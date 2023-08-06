@@ -1,0 +1,21 @@
+[
+    [
+        "Monsters",
+        [
+            "id",
+            "name",
+            "maxHP",
+            "level",
+            "atk",
+            "modelGuid"
+        ],
+        [
+            "number",
+            "string",
+            "number",
+            "number",
+            "number",
+            "string"
+        ]
+    ]
+]

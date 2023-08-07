@@ -63,3 +63,55 @@ declare namespace GameConst{
         AimCrouchRun = 6 
     }
 }
+declare namespace GameConst{
+    type 
+
+    type WeaponConfigData = {
+        name : string
+        des : string
+        icon : string
+        selectedIcon : string
+        order : number
+        defaultAimImg : string
+        waistAimMode : string
+        recoilId : number
+        animationId : number
+        banShoot : boolean
+        isHitSelf : boolean
+        isHitFriend : boolean
+        canBeEquipAccessory : number[]
+        damage : number
+        magazineUsed : number
+        hitHeadDamageRate : number
+        hitBodyDamageRate : number
+        hitLimbDamageRate : number
+        distance : number
+        bulletName : string
+        bulletHole : string
+        bulletShell : string
+        autoReload : boolean
+        mechinicalAimFOV : number
+        waistAimFOV : number
+        shootSpeed : number
+        bulletPerShoot : number
+        consumeSingleBulletPerShoot : number
+        shootMode : FireModeEnum[]
+        defaultShootMode : FireModeEnum
+        rapidly_1 : number
+        rapidly_2 : number
+        gunMode : GunModeEnum
+        accurateAim : boolean
+        canBeEquipPosition : CanBeEquipPositionEnum
+        aimTime : number
+        stopAimTime : number
+        assistAimTime : number
+        assistAimDis0 : number
+        assistAimDis1 : number
+        assistAimRatio : number
+        reloadWithMagazines : boolean
+        canInterruptBulletLoad : boolean
+        hitEffect : string
+        fireEffect : string
+        bulletSpeed : number
+    }
+}

@@ -64,8 +64,15 @@ declare namespace GameConst{
     }
 }
 declare namespace GameConst{
-    type 
+    type DamageAttenuation = {
+        Distance: number;
+        Attenuation: number;
+    }
 
+    type BoneWeight = {
+
+    }
+    /**枪械配置静态属性 */
     type WeaponConfigData = {
         name : string
         des : string
@@ -113,5 +120,82 @@ declare namespace GameConst{
         hitEffect : string
         fireEffect : string
         bulletSpeed : number
+        damageAttenuation : DamageAttenuation[]
+        explosionDamageAttenuation : DamageAttenuation[]
+        characterAnimationMode : number
+        pumpAfterFinalLoad : boolean
+        pumpAfterFire : boolean
+        boneWeight : BoneWeight
+        damageResponseWaitTime : number
+        gravityScale : number
+        explosionRange : number
+        weight : number
+    }
+    /**枪械弹夹配置静态属性 */
+    type WeaponMagazineConfigData = {
+        matchAmmo : number
+        name : string
+        maxNum : number
+        loadTime : number
+        ammoName : string
+        ammoDes : string
+        ammoIcon : string
+        ammoHitTexture : string
+        ammoModel : string
+    }
+    /**枪械配件配置静态属性 */
+    type WeaponAccessoryConfigData = {
+        name : string
+        des : string
+        icon : string
+        location : Vector
+        order : number
+        model : string
+        isSilencer : boolean
+        aimFovRate : number 
+        minErrorRate : number
+        maxErrorRate : number
+        gunRecoverRate : number
+        verticalJumpAngleRate : number
+        horizontalJumpRangeRate : number
+        selfSpinRangeRate : number
+        jumpFovRate : number
+        bulletSpeedRate : number
+        magazineLoadTimeRate : number
+        maxAmmoRate : number
+        aimTimeRate : number
+        pickSound : string
+    }
+    /**枪械相机相关的配置 */
+    type WeaponCameraConfigData = {
+        vibrationDump : number
+        vibrationOmega : number
+        jumpTime : number
+        jumpFOV : number
+    }
+    /**后坐力配置 */
+    type WeaponRecoilConfigData = {
+        minError : number
+        maxError : number
+        gunRecoil : number
+        gunRecoverRate : number
+        diffuseRecoverRate : number
+        verticalJumpAngle : number
+        backTotal : number
+        horizontalJumpRange : number
+        verticalJumpRange : number
+        selfSpinRange : number
+        selfSpinMax : number
+
+        uiJumpAmpl : number
+        uiJumpMax : number
+        uiJumpDump : number
+        uiJumpOmega : number
+        uiJumpAngle : number
+
+        shakeIntensity : number
+        diffuseFunction : DiffuseFunctionEnum
+        jumpErrorScale : number
+        crouchErrorScale : number
     }
 }

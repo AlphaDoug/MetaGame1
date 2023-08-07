@@ -49,6 +49,7 @@ export abstract class WeaponBaseCls {
     private _isWaitingPump = false
     private _zoomInTryPump = false
     private _isWithDrawing = false
+    private _pumpMakeShell = false
     private _weaponAccessoryList : object = {
         muzzle: null,
         grip: null,
@@ -101,12 +102,45 @@ export abstract class WeaponBaseCls {
             this._isFiringOnNextUpdate = true
         }
         /**自动装弹开启后，进行检测 */
-        if (true) {
-            
+        if (this._configData.autoReload) {
+            //if(this._magazine.)
         }
         /**上一帧开火了并且需要拉枪栓,并且当前没有在装子弹和正在拉枪栓的过程中 */
-        if (this.pum) {
-            
+        if (this._configData.pumpAfterFire && this._hasJustFired && !this._onReload && !this._isPumping) {
+            if (this._isZoomIn) {
+                this._isWaitingPump = true
+            }else{
+                this.PumpStart()
+            }
         }
+        if (this._zoomInTryPump && this._isWaitingPump) {
+            this._zoomInTryPump = true
+            this.PumpStart()
+        }
+        /**准备在下一帧进行换弹操作 */
+        if(this._isGoingToReloadMagazine){
+            this._onReload = true
+            this._isReloadOnNextUpdate = true
+            this._isAllowed = false
+            //this._reloadWait = 
+        }
+        /**准备在下一帧进行拉枪栓操作 */
+        if (this._isGoingToPump) {
+            this._isPumpNextUpdate = true
+            this._isAllowed = false
+            this._pumpMakeShell = false
+            this._isPumping = true
+            this._pumpWait = 1 / this._configData.shootSpeed
+        }
+        let isAllowedAndFiring = this._isGoingToFire && this._isAllowed
+        if (this.character) {
+            if (isAllowedAndFiring && !this._wasAllowedAndFiring) {
+                
+            }
+        }
+    }
+
+    protected PumpStart():void{
+        
     }
 }

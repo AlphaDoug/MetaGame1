@@ -4,17 +4,20 @@ import { WeaponCameraCls } from "./WeaponCameraCls";
 import { WeaponMagazineCls } from "./WeaponMagazineCls";
 import { WeaponRecoilCls } from "./WeaponRecoilCls";
 
-declare namespace WeaponTool{
-    export function InitWeaponConfig(_weapon:WeaponBaseCls):void
-    export function InitWeaponMagazineConfig(_magazine:WeaponMagazineCls):void
-    export function InitWeaponRecoilConfig(_recoil:WeaponRecoilCls):void
-    export function InitWeaponCameraConfig(_camera:WeaponCameraCls):void
-    export function InitWeaponAccessoryConfig(_accessory:WeaponAccessoryBaseCls):void
-    
-}
-
-namespace WeaponTool{
-    function InitWeaponConfig(_weapon:WeaponBaseCls){
+export namespace WeaponTool{
+    export function InitWeaponConfig(_weapon:WeaponBaseCls){
+        
+    }
+    export function InitWeaponMagazineConfig(_magazine:WeaponMagazineCls){
+        
+    }
+    export function InitWeaponRecoilConfig(_recoil:WeaponRecoilCls){
+        
+    }
+    export function InitWeaponCameraConfig(_camera:WeaponCameraCls){
+        
+    }
+    export function InitWeaponAccessoryConfig(_accessory:WeaponAccessoryBaseCls){
         
     }
 }

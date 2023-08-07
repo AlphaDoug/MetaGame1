@@ -1,4 +1,24 @@
 declare namespace GameConst{
+    enum LocalWeaponEvent {
+        PickWeapon = 'PickWeapon',
+        DrawWeapon = 'DrawWeapon',
+        WithDrawWeapon = 'WithDrawWeapon',
+        MagazineLoadStarted = 'MagazineLoadStarted',
+        FullyLoaded = 'FullyLoaded',
+        BulletLoadStarted = 'BulletLoadStarted',
+        BulletLoaded = 'BulletLoaded',
+        ReloadFinished = 'ReloadFinished',
+        PumpStarted = 'PumpStarted',
+        Pumped = 'Pumped',
+        Fired = 'Fired',
+        EmptyFire = 'EmptyFire',
+        FireStarted = 'FireStarted',
+        FireStopped = 'FireStopped',
+        SuccessfullyHit = 'SuccessfullyHit',
+        SuccessfullyHitTarget = 'SuccessfullyHitTarget',
+        AimIn = 'AimIn',
+        AimOut = 'AimOut',
+    }
     enum GunModeEnum {
         SniperRifle = 1, 
         AssaultRifle = 2, 

@@ -4,6 +4,7 @@ import { WeaponGUICls } from "./WeaponGUICls"
 import { WeaponMagazineCls } from "./WeaponMagazineCls"
 import { WeaponRecoilCls } from "./WeaponRecoilCls"
 import { WeaponSoundCls } from "./WeaponSoundCls"
+type FireModeEnum = GameConst.FireModeEnum
 
 export abstract class WeaponBaseCls {
 
@@ -28,7 +29,7 @@ export abstract class WeaponBaseCls {
     private _isdraw: boolean = false
     private _isZoomIn : boolean = false
     private _rapidlyRemainingBullets: number = 1
-    private _curShootMode : number = 1
+    private _curShootMode : FireModeEnum = GameConst.FireModeEnum.Auto
     private _hasJustFired : boolean = false
     private _fireWait : number = 0
     private _isGoingToFire = false
@@ -85,6 +86,10 @@ export abstract class WeaponBaseCls {
 
 
         this.LaterInitialize()
+    }
+    /**析构函数，需要手动调用 */
+    destructor(){
+        
     }
     /**在实例化最开始执行 */
     protected EarlyInitialize():void{
@@ -183,12 +188,12 @@ export abstract class WeaponBaseCls {
                     // Currently reloading the entire magazine
                     this._isAllowed = true;
                     this._isReloadOnNextUpdate = false;
-                    //this._magazine.LoadMagazine();
+                    this._magazine.LoadMagazine();
                     this._onReload = false;
                     Events.dispatchLocal(GameConst.LocalWeaponEvent.ReloadFinished, this)
                 } else {
                     // Currently reloading one bullet at a time
-                    //this._magazine.LoadOneBullet();
+                    this._magazine.LoadOneBullet();
                     Events.dispatchLocal(GameConst.LocalWeaponEvent.BulletLoaded, this)
                     // Reloaded one bullet, check if the magazine is not fully loaded
                     if (this._magazine.UpdateLoadPercentage() !== 100) {
@@ -215,8 +220,100 @@ export abstract class WeaponBaseCls {
                     }
                 }
             }
-            
         }
+        /**检查当前拉枪栓操作是否结束 */
+        if (this._isPumpNextUpdate && this._pumpWait < 0) {
+            this._isAllowed = true
+            this._isPumpNextUpdate = false
+            this._isPumping = false
+            this._isWaitingPump = false
+            Events.dispatchLocal(GameConst.LocalWeaponEvent.Pumped, this)
+            if(this._aimBeforePump && !this._autoFireAim){
+                this._aimBeforePump = false
+                this.MechanicalAimStart()
+            }
+        }
+        this._hasJustFired = false
+        /**检查开火状态 */
+        if (this._isFiringOnNextUpdate && this._isAllowed) {
+            let fireDelay = 1 / this._configData.shootSpeed
+            let delay = 0
+            let hasFired = false
+            while(this._fireWait < 0){
+                for(let i = 1; i <= this._configData.bulletPerShoot; i++){
+                    if(this._magazine.isEmptyLoaded){
+                        break
+                    }
+                    if (this.Fire(delay, !this._configData.consumeSingleBulletPerShoot)) {
+                        hasFired = true
+                        this._rapidlyRemainingBullets--
+                    }else{
+                        this._rapidlyRemainingBullets = 0
+                    }
+                }
+                if(hasFired && this._configData.consumeSingleBulletPerShoot){
+                    this.Consume()
+                }
+                if(hasFired){
+                    if(!this._configData.pumpAfterFire){
+                        this.MakeBulletShell()
+                    }
+                    Events.dispatchLocal(GameConst.LocalWeaponEvent.Fired, this)
+                }else{
+                    Events.dispatchLocal(GameConst.LocalWeaponEvent.EmptyFire, this)
+                }
+                delay += fireDelay
+                this._fireWait += fireDelay
+                this._isGoingToFire = false
+            }
+            if(hasFired){
+                this._recoil:Fire()
+                this._cameraControl:InputRecoil(this._recoil)
+            }
+            //当前不允许开枪，则将枪中子弹连发剩余子弹清零
+            if(!this._isAllowed){
+                this._rapidlyRemainingBullets = 0
+            }
+            //根据不同的开火模式进行数据重置
+            if(this._curShootMode != GameConst.FireModeEnum.Auto){
+                if(this._rapidlyRemainingBullets <= 0 || this._magazine.isEmptyLoaded){
+                    this._rapidlyRemainingBullets = 0
+                    this._isGoingToFire = false
+                    this._isFiringOnNextUpdate = false
+                }
+                if(this._curShootMode == GameConst.FireModeEnum.Single){
+                    this._isGoingToFire = false
+                    this._isFiringOnNextUpdate = false
+                }
+            }else{
+                this._rapidlyRemainingBullets = this._rapidlyRemainingBullets <= 0 ? 0 : this._rapidlyRemainingBullets
+                this._isGoingToFire = false
+                this._isFiringOnNextUpdate = false
+            }
+            this._fireWait = Math.max(0, this._fireWait)
+            this._reloadWait = Math.max(0, this._reloadWait)
+            this._pumpWait = Math.max(0, this._pumpWait)
+            //其他控制类的更新
+            this._cameraControl:Update(_dt)
+            this._animationController:Update(_dt)
+            this._recoil:Update(_dt)
+            this._weaponGUI:Update(_dt)
+            this._magazine:Update()
+
+            this.RefreshScales()
+        }
+    }
+
+    private FixUpdate(_dt:number){
+        this._cameraControl:FixUpdate(_dt)
+        this._animationController:FixUpdate(_dt)
+        this._weaponGUI:FixUpdate(_dt)
+    }
+    private RefreshScales() {
+        
+    }
+    protected MechanicalAimStart():void {
+        
     }
 
     protected PumpStart():void{

@@ -91,7 +91,8 @@ export abstract class WeaponBaseCls {
     public destructor() : void {
         this.EarlyDestructor()
         this._weaponGUI:SetVisible(false)
-        
+        this._magazine:RecordingBulletsLeft(true)
+        this.prefab.setVisibility(Type.PropertyStatus.On)
     }
     /**在实例化最开始执行 */
     protected EarlyInitialize():void{

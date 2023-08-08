@@ -88,7 +88,9 @@ export abstract class WeaponBaseCls {
         this.LaterInitialize()
     }
     /**析构函数，需要手动调用 */
-    destructor(){
+    public destructor() : void {
+        this.EarlyDestructor()
+        this._weaponGUI:SetVisible(false)
         
     }
     /**在实例化最开始执行 */
@@ -99,6 +101,10 @@ export abstract class WeaponBaseCls {
     protected LaterInitialize():void {
 
     }
+    protected EarlyDestructor():void {
+        
+    }
+
     /**枪械更新函数 */
     public Update(_dt:number){
         if (this._isWithDrawing) {

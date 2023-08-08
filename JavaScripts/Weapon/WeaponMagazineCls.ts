@@ -10,7 +10,7 @@ export class WeaponMagazineCls{
     private loadPercentage : number
     private isFullyLoaded : boolean
     public isEmptyLoaded : boolean
-    private canLoaded : boolean
+    public canLoaded : boolean
     private loadTimeRateTable: Record<string, number>;
     private loadTimeRateScale: number;
     private maxAmmoRateTable: Record<string, number>;

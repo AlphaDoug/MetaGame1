@@ -1,4 +1,5 @@
-﻿import { WeaponAnimationCls } from "./WeaponAnimationCls"
+﻿import { WeaponAccessoryBaseCls } from "./WeaponAccessoryBaseCls"
+import { WeaponAnimationCls } from "./WeaponAnimationCls"
 import { WeaponCameraCls } from "./WeaponCameraCls"
 import { WeaponGUICls } from "./WeaponGUICls"
 import { WeaponMagazineCls } from "./WeaponMagazineCls"
@@ -52,13 +53,7 @@ export abstract class WeaponBaseCls {
     private _isWithDrawing = false
     private _pumpMakeShell = false
     private _aimBeforePump = false
-    private _weaponAccessoryList : object = {
-        muzzle: null,
-        grip: null,
-        magazine : null,
-        butt: null,
-        sight : null
-    }
+    private _weaponAccessoryList : Map<GameConst.WeaponAccessoryTypeEnum, WeaponAccessoryBaseCls> = new Map<GameConst.WeaponAccessoryTypeEnum, WeaponAccessoryBaseCls>()
     
     private _magazine: WeaponMagazineCls
     private _recoil : WeaponRecoilCls
@@ -93,6 +88,23 @@ export abstract class WeaponBaseCls {
         this._weaponGUI:SetVisible(false)
         this._magazine:RecordingBulletsLeft(true)
         this.prefab.setVisibility(Type.PropertyStatus.On)
+        this._weaponAccessoryList.forEach((value, key) => {
+            if (value) {
+                value.UnEquipFromWeapon()             
+            }
+        })
+        this._weaponAccessoryList.clear()
+        //析构枪上的自有类
+        this._cameraControl.destructor()
+        this._recoil.destructor()
+        this._magazine.destructor()
+        this._weaponGUI.destructor()
+        this._animationController.destructor()
+        this._weaponSound.destructor()
+        //清除枪械所有者
+        //self.gun.Player.Value = nil
+
+
     }
     /**在实例化最开始执行 */
     protected EarlyInitialize():void{
@@ -316,20 +328,163 @@ export abstract class WeaponBaseCls {
         this._animationController:FixUpdate(_dt)
         this._weaponGUI:FixUpdate(_dt)
     }
+    /**
+     * 枪上装备一个配件
+     * @param acce 配件实例
+     * @returns 
+     */
+    public EquipAccessory(acce:WeaponAccessoryBaseCls): [boolean, WeaponAccessoryBaseCls] {
+        let acceId = acce.id
+        let canBeEquip = false
+        this._configData.canBeEquipAccessory.forEach(id => {
+            if (id == acceId) {
+                canBeEquip = true
+            }
+        })
+        if (!canBeEquip) {
+            return [false, null]
+        }
+        let originAcce = this._weaponAccessoryList.get(acce.configData.location)
+        this._weaponAccessoryList.set(acce.configData.location, acce)
+        acce.EquipToWeapon(this)
+        return [true, originAcce]
+    }
+    public UnEquipAccessory(_locationOrCls:WeaponAccessoryBaseCls | number): void{
+        if(_locationOrCls instanceof WeaponAccessoryBaseCls){
+            this._weaponAccessoryList.delete(_locationOrCls.configData.location)
+        }else{
+            this._weaponAccessoryList.delete(_locationOrCls)
+        }
+    }
+    /**换弹夹,换弹夹的的时候不能拉枪栓 */
+    public LoadMagazine(): void {
+        if(this._isdraw && ! this._isPumping && this._magazine.canLoaded && ! this._onReload){
+            this._isGoingToReloadMagazine = true
+        }
+    }
+    protected PumpStart():void{
+        if(this._isdraw && !this._onReload){
+            this._isGoingToPump = true
+            this._aimBeforePump = this._isZoomIn
+        }
+    }
+    protected async MakeBulletShell():Promise<void>{
+        if(this.toss == null){
+            return
+        }
+        let temp = new Rotation(180 * Math.random(), 0, 180 * Math.random())
+        let obj = await GameObjPool.getInstance().asyncSpawn(this._configData.bulletShell)
+        obj.setWorldLocation(this.toss.getWorldLocation())
+        obj.setWorldRotation(temp)
+    }
+    protected async MakeFireEffect():Promise<void>{
+        let obj =await GameObjPool.getInstance().asyncSpawn(this._configData.fireEffect)
+        obj.setWorldLocation(this.muzzleObj.getWorldLocation())
+    }
+    protected async MakeBullet(endObj:GameObject, endPos:Vector, endNormal:Vector){
+        if(!endObj){
+            return
+        }
+        if(endObj instanceof Character){
+            return
+        }
+        let obj = await GameObjPool.getInstance().asyncSpawn(this._configData.bulletHole)
+        obj.setWorldLocation(endPos)
+        obj.setWorldScale(new Vector(0.1, 0.1, 0.1))
+    }
+    protected async MakeHitEffect(endPos:Vector):Promise<void>{
+        let obj = await GameObjPool.getInstance().asyncSpawn(this._configData.hitEffect)
+        obj.setWorldLocation(endPos)
+    }
+    public IgnoreSelf(ignore:boolean){
+        this._isIgnoringSelf = ignore
+    }
+    public SetFireCondition(side:number){
+        this._hasFireCondition = true
+        this._fireConditionSide = side
+    }
+    public CancelFireCondition(){
+        this._hasFireCondition = false
+    }
+    public TryFireOneBullet(){
+        if(this._isdraw){
+            this._isGoingToFire = true
+            switch (this._curShootMode) {
+                case GameConst.FireModeEnum.Single:
+                    this._rapidlyRemainingBullets = 1
+                    break
+                case GameConst.FireModeEnum.Rapidly_1:
+                    this._rapidlyRemainingBullets = this._configData.rapidly_1
+                    break
+                case GameConst.FireModeEnum.Rapidly_2:
+                    this._rapidlyRemainingBullets = this._configData.rapidly_2
+                    break
+                default:
+                    break
+            }
+        }
+    }
+    public TryKeepFire(){
+        if(this._isdraw && this._curShootMode == GameConst.FireModeEnum.Auto){
+            this._isGoingToFire = true
+        }
+    }
+    public TryPump(b:boolean){
+        if(this._configData.pumpAfterFire && this._isZoomIn && !this._isPumping){
+            //开枪后要拉栓并且现在是开镜状态
+            this._zoomInTryPump = true
+        }
+        if(!b){
+            return
+        }
+        this._autoFireAim = b
+    }
+    public MechanicalAimStart():void {
+        if(this._isZoomIn || !this._isdraw){
+            return
+        }
+        if(!(this.character.movementState == MovementMode.Walk) || this._isPumping || this._onReload){
+            return
+        }
+        this._isZoomIn = true
+        this._cameraControl:MechanicalAimStart()
+        this._weaponGUI:MechanicalAimStart()
+        Events.dispatchLocal(GameConst.LocalWeaponEvent.AimIn, this)
+    }
+    public MechanicalAimStop():void{
+        if(!(this._isZoomIn && this._isdraw)){
+            return
+        }
+        this._isZoomIn = false
+        this._cameraControl:MechanicalAimStop()
+        this._weaponGUI:MechanicalAimStop()
+        Events.dispatchLocal(GameConst.LocalWeaponEvent.AimOut, this)
+    }
+    public WithdrawWeapon():void{
+        if(!this._isdraw){
+            return
+        }
+        this._aimBeforePump = false
+        if(this._isZoomIn){
+            this.MechanicalAimStop()
+        }
+        this._cameraControl.OnUnEquipWeapon(true)
+        this._weaponGUI.SetVisible(false)
+        this.prefab.setVisibility(Type.PropertyStatus.Off)
+        if(this._onReload){
+            this._reloadWait = 0
+            this._isReloadOnNextUpdate = false
+            this._onReload = false
+            this._isAllowed = true
+            Events.dispatchLocal(GameConst.LocalWeaponEvent.ReloadFinished, this)
+        }
+        this._isdraw = false
+        Events.dispatchLocal(GameConst.LocalWeaponEvent.WithDrawWeapon, this)
+    }
     private RefreshScales() {
         
     }
-    protected MechanicalAimStart():void {
-        
-    }
 
-    protected PumpStart():void{
-        
-    }
-    protected MechanicalAimStop():void{
-        
-    }
-    protected MakeBulletShell():void{
-        
-    }
+
+
 }

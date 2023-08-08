@@ -168,7 +168,7 @@ declare namespace GameConst{
         name : string
         des : string
         icon : string
-        location : Vector
+        location : GameConst.WeaponAccessoryTypeEnum
         order : number
         model : string
         isSilencer : boolean

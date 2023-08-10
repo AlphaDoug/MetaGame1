@@ -546,8 +546,38 @@ export abstract class WeaponBaseCls {
             return result
         }
         //判定命中是靶子或者障碍物
-        
+        info.forEach(element => {
+            if (false) {
+                //当前命中的是角色
+                break
+            }
+            if (element.gameObject) {
+                
+                return result
+            }
+
+
+        })
+        //判定命中玩家的部位,判定成功后直接返回
+        info.forEach(element => {
+            
+        })
+
+        return result
     }
+    private CalculateRayCastDirection():Vector{
+        let dir = this.RayCastTarget().divide(this.RayCastOrigin()).normalized
+        if (this._animationController.noShootingState) {
+            //当前为不可射击状态
+            dir = this.muzzleObj.forwardVector
+        }
+        if (this._isZoomIn && this._configData.accurateAim) {
+            return dir
+        }
+        return dir
+            
+    }
+    
     private RefreshScales() {
         
     }

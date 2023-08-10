@@ -92,6 +92,12 @@ declare namespace GameConst{
     type BoneWeight = {
 
     }
+    type WeaponHitResult = {
+        HitPoint : Vector
+        HitObject : GameObject
+        HitNormal : Vector
+        
+    }
     /**枪械配置静态属性 */
     type WeaponConfigData = {
         name : string

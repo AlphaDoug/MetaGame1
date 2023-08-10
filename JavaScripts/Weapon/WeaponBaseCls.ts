@@ -481,6 +481,73 @@ export abstract class WeaponBaseCls {
         this._isdraw = false
         Events.dispatchLocal(GameConst.LocalWeaponEvent.WithDrawWeapon, this)
     }
+    public DrawWeapon():void{
+        if(this._isdraw){
+            return
+        }
+        this._isWithDrawing = true
+        this._isdraw = true
+        this._aimBeforePump = false
+        this._weaponGUI.SetVisible(true)
+        this._cameraControl.OnEquipWeapon(this)
+        this.prefab.setVisibility(Type.PropertyStatus.On)
+        
+        if(this._isWaitingPump){
+            this.PumpStart()
+        }
+        setTimeout(() => {
+            if (this) {
+                this._isWithDrawing = false
+            }
+        }, 1000);       
+        Events.dispatchLocal(GameConst.LocalWeaponEvent.DrawWeapon, this)
+    }
+    /**
+     * Consume
+     */
+    public Consume():void {
+        this._magazine.Consume()()
+    }
+    public ChangeShootMode():GameConst.FireModeEnum {
+        if(this._isdraw && this._isAllowed){
+            if(this._configData.shootMode.length > 0){
+                //y有多种射击模式
+                let nextIndex:number
+                this._configData.shootMode.forEach((value, index) => {
+                    if(value == this._curShootMode){
+                        nextIndex ++
+                        break
+                    }
+                })
+                if(this._configData.shootMode[nextIndex] == null){
+                    nextIndex = 1
+                }
+                this._curShootMode = this._configData.shootMode[nextIndex] 
+            }
+            return this._curShootMode
+        }
+    }
+    public RayCastOrigin():Vector{
+        return this.character.getWorldLocation().add(this.character.getForwardVector().multiply(0.5).add((Vector.up.multiply(this.character.capsuleHalfHeight * 2 - 0.1)))) 
+    }
+    public RayCastTarget():Vector{
+        let [info, isTarget]:[Vector, boolean] = this._cameraControl.GetTarget()
+        if(isTarget){
+            return info
+        }else{
+            return info.multiply(this._configData.distance).add(this.muzzleObj.getWorldLocation())
+        }
+    }
+    private OverloadRayCast(dir:Vector):GameConst.WeaponHitResult{
+        let target = this.RayCastOrigin().add(dir.multiply(this._configData.distance))
+        let info = Gameplay.lineTrace(this.RayCastOrigin(), target)
+        let result:GameConst.WeaponHitResult
+        if(info.length == 0){
+            return result
+        }
+        //判定命中是靶子或者障碍物
+        
+    }
     private RefreshScales() {
         
     }

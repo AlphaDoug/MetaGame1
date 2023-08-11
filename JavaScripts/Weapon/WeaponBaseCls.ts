@@ -19,7 +19,7 @@ export abstract class WeaponBaseCls {
     /**枪械绑定的锚点 */
     public root: GameObject
     /**枪械所属的玩家角色 */
-    private character: Character
+    public character: Character
     /**枪口位置点 */
     private muzzleObj: GameObject
     /**枪管方向 */
@@ -54,7 +54,7 @@ export abstract class WeaponBaseCls {
     private _isWithDrawing = false
     private _pumpMakeShell = false
     private _aimBeforePump = false
-    private _weaponAccessoryList : Map<GameConst.WeaponAccessoryTypeEnum, WeaponAccessoryBaseCls> = new Map<GameConst.WeaponAccessoryTypeEnum, WeaponAccessoryBaseCls>()
+    public _weaponAccessoryList : Map<GameConst.WeaponAccessoryTypeEnum, WeaponAccessoryBaseCls> = new Map<GameConst.WeaponAccessoryTypeEnum, WeaponAccessoryBaseCls>()
     
     private _magazine: WeaponMagazineCls
     private _recoil : WeaponRecoilCls
@@ -62,6 +62,7 @@ export abstract class WeaponBaseCls {
     private _weaponGUI:WeaponGUICls
     private _animationController : WeaponAnimationCls
     private _weaponSound : WeaponSoundCls
+    public error: number
 
     public get _configData() : GameConst.WeaponConfigData
 

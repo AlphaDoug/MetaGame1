@@ -96,7 +96,9 @@ declare namespace GameConst{
         HitPoint : Vector
         HitObject : GameObject
         HitNormal : Vector
-        
+        HitPart : HitPartEnum
+        IsTarget : boolean
+        Damage : number
     }
     /**枪械配置静态属性 */
     type WeaponConfigData = {

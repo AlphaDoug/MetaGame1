@@ -5,6 +5,7 @@ import { WeaponGUICls } from "./WeaponGUICls"
 import { WeaponMagazineCls } from "./WeaponMagazineCls"
 import { WeaponRecoilCls } from "./WeaponRecoilCls"
 import { WeaponSoundCls } from "./WeaponSoundCls"
+import { WeaponTool } from "./WeaponTool"
 type FireModeEnum = GameConst.FireModeEnum
 
 export abstract class WeaponBaseCls {
@@ -62,7 +63,7 @@ export abstract class WeaponBaseCls {
     private _animationController : WeaponAnimationCls
     private _weaponSound : WeaponSoundCls
 
-    private _configData : GameConst.WeaponConfigData
+    public get _configData() : GameConst.WeaponConfigData
 
     private _autoFireAim:boolean
     constructor(_character:Character, _root : GameObject, _weaponObj: GameObject){
@@ -574,11 +575,66 @@ export abstract class WeaponBaseCls {
         if (this._isZoomIn && this._configData.accurateAim) {
             return dir
         }
-        return dir
-            
+        return WeaponTool.RandomRotate(dir, this._recoil.currentError)     
     }
-    
+    protected Fire(delay:number, consume:boolean){
+        let isFriend = false
+        let direction = this.CalculateRayCastDirection()
+        let hit = this.OverloadRayCast(direction)
+        this._hasJustFired = true
+        if(!isFriend && hit){
+            let endPos = hit.HitPoint
+            let endNorm = hit.HitNormal
+            let endObj = hit.HitObject
+            if(consume){
+                this.Consume()
+            }
+            if(hit.HitObject == null){
+                endPos = this.RayCastOrigin().add(direction.multiply(this._configData.distance * ))
+            }
+            this.MakeBullet(endObj, endPos, endNorm)
+            if(hit.IsTarget){
+                hit.Damage = this._configData.damage
+                Events.dispatchLocal(GameConst.LocalWeaponEvent.SuccessfullyHitTarget, this, hit)
+            }
+            return true
+        }else{
+            return false
+        }   
+    }
+    protected Damage(hit : GameConst.WeaponHitResult){
+        let hitPos = hit.HitPoint
+        let attenuation:number
+        if(hitPos == null){
+            attenuation = 0
+        }else{
+            let dis:number = hitPos.divide(this.character.getWorldLocation()).magnitude
+            attenuation = WeaponTool.GetAttenuationByGunId(1, this, dis)
+        }
+        let damage = this._configData.damage + attenuation
+        damage = damage <= 0 ? 0 : damage
+        switch (hit.HitPart) {
+            case GameConst.HitPartEnum.Limb:
+                damage = damage * this._configData.hitLimbDamageRate
+                break;
+            case GameConst.HitPartEnum.Body:
+                damage = damage * this._configData.hitBodyDamageRate
+                break;
+            case GameConst.HitPartEnum.Head:
+                damage = damage * this._configData.hitHeadDamageRate
+                break;
+            default:
+                break;
+        }
+        if(damage > 0){
+            let targetPlayer : Character 
+            Events.dispatchLocal(GameConst.LocalWeaponEvent.SuccessfullyHit, hitPos, targetPlayer, damage, hit.HitPart)
+            //伤害发起
+
+        }
+    }
     private RefreshScales() {
+        let factor = 1
         
     }
 

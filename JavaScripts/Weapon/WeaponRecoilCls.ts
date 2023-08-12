@@ -1,5 +1,6 @@
 import { WeaponAccessoryBaseCls } from "./WeaponAccessoryBaseCls"
 import { WeaponBaseCls } from "./WeaponBaseCls"
+import { WeaponTool } from "./WeaponTool"
 type RateStruct = {
     Move:number
     Crouch:number
@@ -92,11 +93,71 @@ export class WeaponRecoilCls{
         // Update influence factor magnitudes
         this.RefreshScales()
     }
-    RefreshScales() {
-        throw new Error("Method not implemented.")
-    }
-    GetDiffuse(_dt: number): number {
-        throw new Error("Method not implemented.")
+
+    GetHorizontal(): number {
+        return this._horizontalScale * this._configData.horizontalJumpRange * WeaponTool.GaussRandom();
     }
 
+    GetMinError(): number {
+        return this._configData.minError * this._minErrorScale;
+    }
+
+    GetMaxError(): number {
+        return this._configData.maxError * this._maxErrorScale;
+    }
+
+    GetShakeTime(): number {
+        return this._configData.gunRecoil / (this._configData.gunRecoverRate * this._recoverRateScale);
+    }
+
+    GetSelfSpinRange(): number {
+        return this._configData.selfSpinRange * this._selfSpinRangeRateScale;
+    }
+
+    Fire(): void {
+        this._unstability = Math.min(1.0, this._unstability + this._configData.gunRecoil);
+    }
+
+    GetDiffuse(_dt: number): number {
+        let tobe = this.GetMinError() + this.difFunction(null) * (this.GetMaxError() - this.GetMinError())
+        this._currentError += _dt * 10 * (tobe - this._currentError)
+        return this._currentError
+    }
+    GetShakeIntensity():number{
+        return this._configData.shakeIntensity
+    }
+
+    RefreshScales() {
+        let factor = 1
+        this._horizontalRateTable.forEach((v, k) => {
+            factor *= v
+        })
+        this._horizontalScale = factor
+        factor = 1
+        this._verticalRateTable.forEach((v, k) => {
+            factor *= v
+        })
+        this._verticalScale = factor
+        factor = 1
+        this._minErrorRateTable.forEach((v, k) => {
+            factor *= v
+        })
+        this._minErrorScale = factor
+        factor = 1
+        this._maxErrorRateTable.forEach((v, k) => {
+            factor *= v
+        })
+        this._maxErrorScale = factor
+        factor = 1
+        this._recoverRateTable.forEach((v, k) => {
+            factor *= v
+        })
+        this._recoverRateScale = factor
+        factor = 1
+        this._selfSpinRangeRateTable.forEach((v, k) => {
+            factor *= v
+        })
+        this._selfSpinRangeRateScale = factor
+    }
+    
 }

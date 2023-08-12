@@ -21,6 +21,13 @@ export class WeaponMagazineCls{
 
     constructor(weapon : WeaponBaseCls){
         WeaponTool.InitWeaponMagazineConfig(this)
+        //this.leftAmmo = _gun.gun.AmmoLeft.Value
+        let moveAmmo = this.leftAmmo - this._configData.maxNum
+        if (moveAmmo > 0) {
+            this.leftAmmo = this._configData.maxNum
+        } else {
+            moveAmmo = 0
+        }
         
     }
 

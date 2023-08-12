@@ -23,17 +23,14 @@ export namespace WeaponTool{
     /**
      * 输出三倍标准差为1 的分布在（-1， 1）之间的正态分布
      */
-    export function GaussRandom(_isSeeded : boolean) : number{
-        if (!_isSeeded) {
-            
-        }
+    export function GaussRandom() : number{
         let u = Math.random()
         let v = Math.random()
         let z = Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * v)
         z = ( z + 3) / 6
         z = z * 2 - 1
         if (Math.abs(z) > 1) {
-            return GaussRandom(true)
+            return GaussRandom()
         }
         return z
     }
@@ -66,7 +63,7 @@ export namespace WeaponTool{
     }
     export function RandomRotate(direction: Vector, maxSpreadAngle: number):Vector {
         // 生成随机扩散角
-        const spreadAngle = GaussRandom(true) * maxSpreadAngle;
+        const spreadAngle = GaussRandom() * maxSpreadAngle;
 
         // 生成随机旋转角度
         const randomRotation = Math.random() * 2 * Math.PI;

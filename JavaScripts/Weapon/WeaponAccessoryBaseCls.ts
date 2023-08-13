@@ -8,6 +8,7 @@ export abstract class WeaponAccessoryBaseCls{
     private attachedWeapon : WeaponBaseCls
     private HitPart: GameConst.HitPartEnum
 
+
     public configData: GameConst.WeaponAccessoryConfigData
     constructor(_obj: GameObject){
         this.weaponAccessory = _obj

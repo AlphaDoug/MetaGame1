@@ -59,7 +59,7 @@ export abstract class WeaponBaseCls {
     private _magazine: WeaponMagazineCls
     private _recoil : WeaponRecoilCls
     private _cameraControl : WeaponCameraCls
-    private _weaponGUI:WeaponGUICls
+     _weaponGUI:WeaponGUICls
     private _animationController : WeaponAnimationCls
     private _weaponSound : WeaponSoundCls
     public error: number

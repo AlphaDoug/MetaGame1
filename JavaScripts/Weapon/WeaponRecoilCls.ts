@@ -7,7 +7,7 @@ type RateStruct = {
 }
 export class WeaponRecoilCls{
     private id : number
-    private gun : WeaponBaseCls
+    gun : WeaponBaseCls
     private _verticalScale: number = 1
     private _horizontalScale: number = 1
     private _minErrorScale: number = 1

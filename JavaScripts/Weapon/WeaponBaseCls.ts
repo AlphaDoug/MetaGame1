@@ -57,7 +57,7 @@ export abstract class WeaponBaseCls {
     public _weaponAccessoryList : Map<GameConst.WeaponAccessoryTypeEnum, WeaponAccessoryBaseCls> = new Map<GameConst.WeaponAccessoryTypeEnum, WeaponAccessoryBaseCls>()
     
     private _magazine: WeaponMagazineCls
-    private _recoil : WeaponRecoilCls
+     _recoil : WeaponRecoilCls
     private _cameraControl : WeaponCameraCls
      _weaponGUI:WeaponGUICls
     private _animationController : WeaponAnimationCls
@@ -518,7 +518,7 @@ export abstract class WeaponBaseCls {
                 this._configData.shootMode.forEach((value, index) => {
                     if(value == this._curShootMode){
                         nextIndex ++
-                        break
+                        return
                     }
                 })
                 if(this._configData.shootMode[nextIndex] == null){

@@ -26,7 +26,7 @@ export class WeaponRecoilCls{
     private _selfSpinRangeRateTable: Map<GameConst.WeaponAccessoryTypeEnum|string, number>
 
     private _lastPos : Vector
-    private _configData : GameConst.WeaponRecoilConfigData
+    _configData : GameConst.WeaponRecoilConfigData
 
     difFunction(_unstability:number) {
         _unstability = _unstability || this._unstability

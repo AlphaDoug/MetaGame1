@@ -2,11 +2,12 @@ import { WeaponBaseCls } from "./WeaponBaseCls";
 import { WeaponRecoilCls } from "./WeaponRecoilCls";
 import { TweenUtil } from "../Tool/TweenUtil";
 import { WeaponTool } from "./WeaponTool";
+import { CameraController } from "./CameraController";
 
 export class WeaponCameraCls{
     gunRecoil : WeaponRecoilCls
     gun : WeaponBaseCls
-    m_camera : GameObject
+    m_camera : CameraSystem
     m_originZoom : number
     m_supposedZoom : number
     m_sightZoom : number
@@ -35,6 +36,7 @@ export class WeaponCameraCls{
     AimingIsOver : boolean
     m_jumpFovRateScale : number
     m_aimTimeRateScale : number
+    lastZoom : number
     m_jumpFovRateTable : Map<GameConst.WeaponAccessoryTypeEnum, number>
     m_aimTimeRateTable : Map<GameConst.WeaponAccessoryTypeEnum, number>
     
@@ -307,6 +309,80 @@ export class WeaponCameraCls{
         this.deltaPhy = 0
         this.deltaTheta = 0
     }
+    OnEquipWeapon(_gunController : WeaponBaseCls, info) {
+        this.gun = _gunController
+        this.m_camera = Gameplay.getCurrentPlayer().character.cameraSystem
+        this.lastZoom = this.m_camera.cameraFOV
+        let t = new Transform()
+        t.rotation = this.m_camera.cameraSystemRelativeTransform.rotation
+        t.scale = this.m_camera.cameraSystemRelativeTransform.scale
+        t.location = new Vector(0, 0, Gameplay.getCurrentPlayer().character.capsuleHalfHeight * 2).add(this.m_currentOffset)
+        this.m_camera.cameraSystemRelativeTransform = t
+        this.m_sightZoom = this.gun._configData.mechinicalAimFOV
+        this.m_originZoom = this.gun._configData.waistAimFOV
+        this.m_supposedZoom = this.m_originZoom
+        CameraController.Instance.fieldOfView = this.m_sightZoom
+        this.isUpdating = true
+        CameraController.Instance.gun = this.gun
+    }
+    InputRecoil(_recoil : WeaponRecoilCls){
+        this.m_backTime = this.GetBackTime()
+        let vert = _recoil.getVertical() * Math.PI / 180
+        this.m_backTotal = _recoil._configData.backTotal * vert
+        this.vibrationAmpl = _recoil.GetSelfSpinRange() * Math.PI / 180
+        this.m_jumpTotal = new Vector2(_recoil.GetHorizontal() * Math.PI / 180, vert)
+        this.selfSpinController.StartFunction(this.selfSpinController)
+        this.jumpController.StartFunction(this.jumpController)
+        this.recoverController.StartFunction(this.recoverController)
+        this.jumpFOVController.StartFunction(this.jumpFOVController)
+    }
+    Crouch(){
+        this.assistAimController.StopFunction(this.assistAimController)
+    }
+    MechanicalAimStart(){
+        this.AimingIsOver = false
+        this.aimController.StartFunction(this.aimController)
+    }
+    GetAssistAimDis():number{
+        return this.m_isZoomIn ? this.gun._configData.assistAimDis1 : this.gun._configData.assistAimDis0
+    }
+    MechanicalAimStop(){
+        this.deaimController.StartFunction(this.deaimController)
+    }
+    GetAimTime():number{
+        return this.aimTime + this.m_aimTimeRateScale
+    }
+    GetBackTime():number{
+        return this.gun._recoil.GetShakeTime()
+    }
+    OnUnEquipWeapon(_useStateBefore : boolean){
+        CameraController.Instance.fieldOfView = this.lastZoom
+        CameraController.Instance.gun = null
+        this.EndAll()
+        this.isUpdating = false
+    }
+    GetEnemies():Array<Character>{
+        let res = new Array<Character>()
+        Gameplay.getAllPlayers().forEach((v)=>{
+            
+        })
+        return res
+    }
+    IsVisible(_enemy:Character):boolean{
+        let pos = this.GetCameraPos()
+        let res = true
+        let rayCastHead = Gameplay.lineTrace(pos, _enemy.getWorldLocation().add(Vector.up.multiply(_enemy.capsuleHalfHeight)))
+        rayCastHead.forEach((v)=>{
+            if(!(v.gameObject instanceof Character) || (v.gameObject != _enemy && (v.gameObject) != Gameplay.getCurrentPlayer().character)){
+                res = false
+                return
+            }
+        })
+        return res
+    }
+    EndAll() {
+        throw new Error("Method not implemented.");
+    }
     RefreshSettings() {
         throw new Error("Method not implemented.");
     }
@@ -316,11 +392,20 @@ export class WeaponCameraCls{
     SetProperties() {
         throw new Error("Method not implemented.");
     }
-    GetSightFOV(): any {
-        throw new Error("Method not implemented.");
-    }
-    GetAimTime(): number {
-        throw new Error("Method not implemented.");
+    GetSightFOV(): number {
+        //若配件中有一个配件设置了大于零的开镜FOV则直接返回此数值,否则返回枪械自身的FOV
+        let fov = 0
+        this.gun._weaponAccessoryList.forEach((v, k)=>{
+            if (v.configData.aimFovRate > 0) {
+                fov = v.configData.aimFovRate
+                return
+            }
+        })
+        if (fov != 0) {
+            return fov
+        }else{
+            return this.gun._configData.mechinicalAimFOV
+        }
     }
     IsRight(targetPos: Vector):boolean {
         throw new Error("Method not implemented.");
@@ -329,9 +414,12 @@ export class WeaponCameraCls{
         throw new Error("Method not implemented.");
     }
     GetJumpFOV(): number {
-        throw new Error("Method not implemented.");
+        return this.configData.jumpFOV * this.m_jumpFovRateScale * 
+        Gameplay.getCurrentPlayer().character.cameraSystem.cameraFOV / this.m_originZoom
     }
     GetAimPos(enemy:Character): Vector {
-        throw new Error("Method not implemented.");
+        let pos1:Vector
+        let pos2 :Vector
+        
     }
 }

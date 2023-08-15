@@ -20,6 +20,9 @@ export namespace WeaponTool{
     export function InitWeaponAccessoryConfig(_accessory:WeaponAccessoryBaseCls){
         
     }
+    export function Shake(_strength:number){
+        return _strength * (Math.random() - 0.5)
+    }
     /**
      * 将一个向量，按照给定的旋转轴，旋转指定弧度之后得到一个新的向量
      * @param source 源向量

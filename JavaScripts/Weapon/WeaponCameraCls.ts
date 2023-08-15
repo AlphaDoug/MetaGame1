@@ -37,6 +37,8 @@ export class WeaponCameraCls{
     m_jumpFovRateScale : number
     m_aimTimeRateScale : number
     lastZoom : number
+    targetCallTime : number
+    targetReturn : [Vector, boolean]
     m_jumpFovRateTable : Map<GameConst.WeaponAccessoryTypeEnum, number>
     m_aimTimeRateTable : Map<GameConst.WeaponAccessoryTypeEnum, number>
     
@@ -286,6 +288,10 @@ export class WeaponCameraCls{
             }
         )
     }
+
+    destructor(){
+        this.EndAll()
+    }
     Update(dt:number) {
         if(!this.isUpdating){
             return
@@ -299,11 +305,14 @@ export class WeaponCameraCls{
         this.gun._weaponAccessoryList.forEach((v, k)=>{
             this.m_jumpFovRateTable.set(k, v.configData.jumpFovRate)
         })
+        this.selfSpinController.UpdateFunction(this.selfSpinController, dt)
+        this.jumpFOVController.UpdateFunction(this.jumpFOVController, dt)
         this.jumpController.UpdateFunction(this.jumpController, dt)
         this.recoverController.UpdateFunction(this.recoverController, dt)
         this.assistAimController.UpdateFunction(this.assistAimController, dt)
         this.deaimController.UpdateFunction(this.deaimController, dt)
         this.aimController.UpdateFunction(this.aimController, dt)
+
         this.RefreshScales()
         this.RefreshSettings()
         this.deltaPhy = 0
@@ -381,13 +390,32 @@ export class WeaponCameraCls{
         return res
     }
     EndAll() {
-        throw new Error("Method not implemented.");
+        if(this.m_isZoomIn){
+            this.MechanicalAimStop()
+        }
+        this.selfSpinController?.StopFunction(this.selfSpinController)
+        this.jumpFOVController?.StopFunction(this.jumpFOVController)
+        this.jumpController?.StopFunction(this.jumpController)
+        this.recoverController?.StopFunction(this.recoverController)
+        this.assistAimController?.StopFunction(this.assistAimController)
+        this.deaimController?.StopFunction(this.deaimController)
+        this.aimController?.StopFunction(this.aimController)
+
     }
     RefreshSettings() {
-        throw new Error("Method not implemented.");
+        
     }
     RefreshScales() {
-        throw new Error("Method not implemented.");
+        let factor = 1
+        this.m_jumpFovRateTable.forEach((v, k)=>{
+            factor *= v
+        })
+        this.m_jumpFovRateScale = factor
+        factor = 1
+        this.m_aimTimeRateTable.forEach((v, k)=>{
+            factor *= v
+        })
+        this.m_aimTimeRateScale = factor
     }
     SetProperties() {
         CameraController.Instance.deltaTheta += this.deltaTheta
@@ -413,11 +441,18 @@ export class WeaponCameraCls{
         }
     }
     IsRight(targetPos: Vector):boolean {
-        throw new Error("Method not implemented.");
+        return Vector.dot(Vector.cross(this.m_camera.transform.getForwardVector(), Vector.up), targetPos.subtract(this.GetCameraPos())) > 0
+    }
+    IsUp(targetPos: Vector):boolean {
+        let relativePos = targetPos.subtract(this.GetCameraPos())
+        return Math.atan(relativePos.y / new Vector2(relativePos.x, relativePos.z).magnitude) > (90 - Vector.angle(this.m_camera.transform.getForwardVector(), Vector.up) * Math.PI / 180)
+    }
+    DragStart(){
+        this.m_lastMousePos = UI.getMousePositionOnViewport()
     }
     GetCameraPos():Vector {
         let offset = this.m_camera.cameraSystemRelativeTransform.location
-        return Gameplay.getCurrentPlayer().character.getWorldLocation().add(offset.rot)
+        return Gameplay.getCurrentPlayer().character.getWorldLocation().add(WeaponTool.RotateVector(offset, Vector.up, Gameplay.getCurrentPlayer().character.getWorldRotation().z))
     }
     GetJumpFOV(): number {
         return this.configData.jumpFOV * this.m_jumpFovRateScale * 
@@ -430,4 +465,60 @@ export class WeaponCameraCls{
         pos2 = enemy.getAppearance<HumanoidV2>().getSlotWorldPosition(SlotType.Buttocks)
         return pos1.multiply(2).add(pos2).divide(3)
     }
+    GetTarget():[Vector, boolean]{
+        if(this.targetCallTime && TimeUtil.elapsedTime() - this.targetCallTime < 0.01){
+            return this.targetReturn
+        }
+        let dir = this.m_camera.transform.getForwardVector().normalized
+        let pos = this.GetCameraPos()
+        let raycastAll = Gameplay.lineTrace(pos.add(dir.multiply(0.5)), pos.add(dir.multiply(this.gun._configData.distance)))
+        this.aimEnemy = null
+        if(this.enableAssistAim){
+            let minDis = this.GetAssistAimDis()
+            let candidate:Character
+            this.GetEnemies().forEach((v)=>{
+                //找到最近的人
+                let targetPos = this.GetAimPos(v)
+                let targetDis = targetPos.subtract(pos).magnitude
+                let angle = Vector.angle(dir, targetPos.subtract(pos))
+                let aimDis = targetDis * Math.sin(angle * Math.PI / 180)
+                if(angle < 30 && aimDis <= minDis && this.IsVisible(v)){
+                    candidate = v
+                    minDis = aimDis
+                }
+            })
+            this.aimEnemy = candidate
+        }
+        let finalPoint
+        let i
+        raycastAll.forEach((v)=>{
+            if(!(v instanceof Character)){
+                finalPoint = v.impactPoint
+                return
+            }
+        })
+        if(finalPoint){
+            this.targetReturn = [finalPoint, true]
+        }else{
+            this.targetReturn = [dir, false]
+        }
+        this.targetCallTime = TimeUtil.elapsedTime()
+        return this.targetReturn
+    }
+    GetSensitivity():number{
+        return this.m_camera.cameraFOV / 60 * this.m_sensitivity
+    }
+    DragHold(){
+        let temp = UI.getMousePositionOnViewport()
+        if(!this.m_lastMousePos){
+            return
+        }
+        this.deltaPhy += (temp.x - this.m_lastMousePos.x) * this.screenSize.x * this.GetSensitivity()
+        this.deltaTheta += (temp.y - this.m_lastMousePos.y) * this.screenSize.y * this.GetSensitivity()
+        this.m_lastMousePos = temp
+    }
+    DragEnd():void{
+        this.m_lastMousePos = null
+    }
+
 }

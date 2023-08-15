@@ -34,6 +34,10 @@ export class TweenUtil{
                 update(t.time,t.totalTime,t.time)
             }
             this.StopFunction = (t:TweenUtil)=>{
+                if(!this.isPlaying)
+                {
+                    return
+                }
                 callback()
                 this.isPlaying = false
             }

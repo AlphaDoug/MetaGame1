@@ -21,6 +21,23 @@ export namespace WeaponTool{
         
     }
     /**
+     * 将一个向量，按照给定的旋转轴，旋转指定弧度之后得到一个新的向量
+     * @param source 源向量
+     * @param axis 旋转轴
+     * @param angle 旋转角度值
+     * @returns 结果向量
+     */
+    export function RotateVector(source:Vector, axis : Vector, angle : number):Vector{
+        let ro = source.toRotation()
+        let qu = ro.toQuaternion()
+        let outer : Quaternion
+        angle = angle 
+        Quaternion.fromAxisAngle(axis, angle, outer)
+        let res : Vector
+        Quaternion.multiplyVector(source, outer, res)
+        return res
+    }
+    /**
      * 输出三倍标准差为1 的分布在（-1， 1）之间的正态分布
      */
     export function GaussRandom() : number{

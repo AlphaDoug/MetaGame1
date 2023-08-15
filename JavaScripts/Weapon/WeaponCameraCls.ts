@@ -144,7 +144,7 @@ export class WeaponCameraCls{
                 let power = omega * Math.cos(omega * (t1 - 0.5 * dt)) * dt
                 this.deltaTheta = this.deltaTheta + power * this.m_jumpTotal.y
                 this.deltaPhy = this.deltaPhy + power * this.m_jumpTotal.x
-                this.jumpController.customData.set("total" , this.jumpController.customData.get("total").divide(this.m_jumpTotal.multiply(power)))
+                this.jumpController.customData.set("total" , this.jumpController.customData.get("total").subtract(this.m_jumpTotal.multiply(power)))
             },
             () => {
                 this.deltaTheta += this.jumpController.customData.get("total").y
@@ -214,7 +214,7 @@ export class WeaponCameraCls{
             () => {},
             () => {
                 let targetPos = this.GetAimPos(this.aimEnemy)
-                let relativePos = targetPos.divide(this.GetCameraPos())
+                let relativePos = targetPos.subtract(this.GetCameraPos())
                 this.assistAimController.customData.set("isRight", this.IsRight(targetPos))
                 this.assistAimController.customData.set("isChange", false)
                 let thetaTotal = Math.atan(relativePos.y / new Vector2(relativePos.x, relativePos.z).magnitude)-
@@ -390,7 +390,12 @@ export class WeaponCameraCls{
         throw new Error("Method not implemented.");
     }
     SetProperties() {
-        throw new Error("Method not implemented.");
+        CameraController.Instance.deltaTheta += this.deltaTheta
+        CameraController.Instance.deltaPhy += this.deltaPhy
+        CameraController.Instance.gamma = this.m_gamma
+        CameraController.Instance.fieldOfView = this.m_supposedZoom + this.m_deltaFOV
+        CameraController.Instance.distance = this.distance
+        CameraController.Instance.offset = this.m_currentOffset
     }
     GetSightFOV(): number {
         //若配件中有一个配件设置了大于零的开镜FOV则直接返回此数值,否则返回枪械自身的FOV
@@ -411,7 +416,8 @@ export class WeaponCameraCls{
         throw new Error("Method not implemented.");
     }
     GetCameraPos():Vector {
-        throw new Error("Method not implemented.");
+        let offset = this.m_camera.cameraSystemRelativeTransform.location
+        return Gameplay.getCurrentPlayer().character.getWorldLocation().add(offset.rot)
     }
     GetJumpFOV(): number {
         return this.configData.jumpFOV * this.m_jumpFovRateScale * 
@@ -420,6 +426,8 @@ export class WeaponCameraCls{
     GetAimPos(enemy:Character): Vector {
         let pos1:Vector
         let pos2 :Vector
-        
+        pos1 = enemy.getAppearance<HumanoidV2>().getSlotWorldPosition(SlotType.Head)
+        pos2 = enemy.getAppearance<HumanoidV2>().getSlotWorldPosition(SlotType.Buttocks)
+        return pos1.multiply(2).add(pos2).divide(3)
     }
 }

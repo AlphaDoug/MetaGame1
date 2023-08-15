@@ -568,7 +568,7 @@ export abstract class WeaponBaseCls {
         return result
     }
     private CalculateRayCastDirection():Vector{
-        let dir = this.RayCastTarget().divide(this.RayCastOrigin()).normalized
+        let dir = this.RayCastTarget().subtract(this.RayCastOrigin()).normalized
         if (this._animationController.noShootingState) {
             //当前为不可射击状态
             dir = this.muzzleObj.forwardVector
@@ -609,7 +609,7 @@ export abstract class WeaponBaseCls {
         if(hitPos == null){
             attenuation = 0
         }else{
-            let dis:number = hitPos.divide(this.character.getWorldLocation()).magnitude
+            let dis:number = hitPos.subtract(this.character.getWorldLocation()).magnitude
             attenuation = WeaponTool.GetAttenuationByGunId(1, this, dis)
         }
         let damage = this._configData.damage + attenuation

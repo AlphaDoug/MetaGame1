@@ -70,20 +70,47 @@ export class PlayerBehavior {
                 this.keyDownTab.push(key)
             }
         })
-        let firParam:string
         if(this.keyDownTab.length == 1){
-            this.PlayerModeChanged(this.keyDownTab[0])
+            switch (this.keyDownTab[0]) {
+                case 'Run':
+                    this.PlayerModeChanged(GameConst.PlayerActionModeEnum.Run)
+                    break;      
+                default:
+                    break;
+            }
         }else if(this.keyDownTab.length == 2){
             this.keyDownTab.forEach((value, key) => {
-                if(value != 'Run'){
-                    this.PlayerModeChanged()
+                switch (value) {
+                    case 'Crouch':
+                        this.PlayerModeChanged(GameConst.PlayerActionModeEnum.CrouchRun)
+                        break;
+                    case 'Quickly':
+                        this.PlayerModeChanged(GameConst.PlayerActionModeEnum.QuicklyRun)
+                        break;
+                    case 'Aim':
+                        this.PlayerModeChanged(GameConst.PlayerActionModeEnum.AimRun)
+                        break;
+                    default:
+                        break;
                 }
             })
         }else if(this.keyDownTab.length == 3){
-            
+            this.keyDownTab.forEach((value, key) => {
+                switch (value) {
+                    case 'Quickly':
+                        this.PlayerModeChanged(GameConst.PlayerActionModeEnum.QuicklyCrouchRun)
+                        break;
+                    case 'Aim':
+                        this.PlayerModeChanged(GameConst.PlayerActionModeEnum.AimCrouchRun)
+                        break;               
+                    default:
+                        break;
+                }
+            })
         }
+        this.keyDownTab = []
     }
-    private PlayerModeChanged(modeName : string){
-        
+    private PlayerModeChanged(modeName : GameConst.PlayerActionModeEnum){
+        this.state = modeName
     }
 }

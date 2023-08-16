@@ -3,7 +3,7 @@ import { WeaponAmmoBaseCls } from "./Weapon/WeaponAmmoBaseCls"
 import { WeaponBaseCls } from "./Weapon/WeaponBaseCls"
 
 export class PlayerGunMgr {
-    player:Character
+    player:Gameplay.Character
 
     curGun:WeaponBaseCls
     mainGun:WeaponBaseCls
@@ -16,7 +16,15 @@ export class PlayerGunMgr {
     public hadAmmoList:Record<string, WeaponAmmoBaseCls>
 
     canUpdateGun = true
-    constructor(player:Character){
+    // 单例模式
+    private static _instance: PlayerGunMgr;
+    public static get Instance() {
+        if (PlayerGunMgr._instance == null) {
+            PlayerGunMgr._instance = new PlayerGunMgr(Gameplay.getCurrentPlayer().character)
+        }
+        return PlayerGunMgr._instance
+    }
+    constructor(player:Gameplay.Character){
         //事件绑定
         InputUtil.onKeyDown(Keys.One, () => {
             this.SwitchWeapon(1)

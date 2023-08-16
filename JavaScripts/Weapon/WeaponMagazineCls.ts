@@ -11,9 +11,9 @@ export class WeaponMagazineCls{
     private isFullyLoaded : boolean
     public isEmptyLoaded : boolean
     public canLoaded : boolean
-    private loadTimeRateTable: Record<string, number>;
+    private loadTimeRateTable: Map<GameConst.WeaponAccessoryTypeEnum, number>;
     private loadTimeRateScale: number;
-    private maxAmmoRateTable: Record<string, number>;
+    private maxAmmoRateTable: Map<GameConst.WeaponAccessoryTypeEnum, number>;
     private maxAmmoRateScale: number;
     private preMaxAmmo : number
 
@@ -29,6 +29,7 @@ export class WeaponMagazineCls{
             moveAmmo = 0
         }
         
+        this.Update()
     }
 
     private UpdateFullyLoaded():boolean {
@@ -47,7 +48,7 @@ export class WeaponMagazineCls{
         this.loadPercentage = Math.floor(this.leftAmmo / this.GetMaxAmmo() * 100)
         return this.loadPercentage
     }
-    private Consume():Function{
+    Consume():Function{
         return () => {
             if (this.leftAmmo > 0) {
                 this.leftAmmo -= 1
@@ -70,9 +71,16 @@ export class WeaponMagazineCls{
             this.UpdateFullyLoaded()
         }
     }
+    /**枪械卸载/更换后,需要将枪械的子弹更新在配件的节点下 */
+    RecordingBulletsLeft(_isBackToBulletInventory:boolean){
+        if(_isBackToBulletInventory && this.ammoInventory){
+            this.ammoInventory.count += this.leftAmmo
+            this.leftAmmo = 0
+        }
+        this.Update()
+    }
 
-
-    private Update():void{
+    Update():void{
         if(this.preMaxAmmo > this.GetMaxAmmo()){
             /**这一帧卸下了扩容弹夹,需要强行减少当前的子弹 */
             if(this.GetMaxAmmo() < this.leftAmmo){
@@ -88,14 +96,29 @@ export class WeaponMagazineCls{
         this.UpdateLoadPercentage()
         /**将当前的剩余子弹更新到场景中的节点上 */
 
+        this.loadTimeRateTable.clear()
+        this.maxAmmoRateTable.clear()
+        this.weapon._weaponAccessoryList.forEach((v, k) => {
+            this.loadTimeRateTable.set(k, v.configData.magazineLoadTimeRate)
+            this.maxAmmoRateTable.set(k, v.configData.maxAmmoRate.get(this.weapon.id))
+        })
 
         this.RefreshScales()
     }
     private RefreshScales():void{
-
+        let factor = 1
+        this.loadTimeRateTable.forEach(v => {
+            factor *= v
+        })
+        this.loadTimeRateScale = factor
+        factor = 1
+        this.maxAmmoRateTable.forEach(v => {
+            factor *= v
+        })
+        this.maxAmmoRateScale = factor
     }
     public GetLoadTime():number{
-        return this._configData.loadTime + this.loadTimeRateScale
+        return this._configData.loadTime * this.loadTimeRateScale
     }
     private GetMaxAmmo():number {
         return this.maxAmmoRateScale + this._configData.maxNum > 0 ? this.maxAmmoRateScale + this._configData.maxNum : 1

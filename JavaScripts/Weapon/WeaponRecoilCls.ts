@@ -16,7 +16,7 @@ export class WeaponRecoilCls{
     private _selfSpinRangeRateScale: number = 1
     
     private _unstability: number = 0
-    private _currentError: number = 0
+    _currentError: number = 0
 
     private _horizontalRateTable: Map<GameConst.WeaponAccessoryTypeEnum|string, number>
     private _verticalRateTable: Map<GameConst.WeaponAccessoryTypeEnum|string, number>
@@ -93,7 +93,9 @@ export class WeaponRecoilCls{
         // Update influence factor magnitudes
         this.RefreshScales()
     }
-
+    GetVertical():number{
+        return (this._configData.verticalJumpAngle + this._configData.verticalJumpRange * WeaponTool.GaussRandom()) * this._verticalScale
+    }
     GetHorizontal(): number {
         return this._horizontalScale * this._configData.horizontalJumpRange * WeaponTool.GaussRandom();
     }

@@ -194,7 +194,7 @@ export class WeaponCameraCls{
                 }
                 let targetPos = this.GetAimPos(this.aimEnemy)
                 //如果已经在瞄着人了则停止
-                let dir = this.m_camera.forwardVector.normalized
+                let dir = this.m_camera.transform.getForwardVector().normalized
                 let pos = this.GetCameraPos()
                 let res = Gameplay.lineTrace(pos.add(dir.multiply(0.5)), pos.add(dir.multiply(this.gun._configData.distance)))
                 res.forEach((v ,k) => {
@@ -220,10 +220,10 @@ export class WeaponCameraCls{
                 this.assistAimController.customData.set("isRight", this.IsRight(targetPos))
                 this.assistAimController.customData.set("isChange", false)
                 let thetaTotal = Math.atan(relativePos.y / new Vector2(relativePos.x, relativePos.z).magnitude)-
-                (90 - Vector.angle(this.m_camera.forwardVector, Vector.up)) / 180 * Math.PI
+                (90 - Vector.angle(this.m_camera.transform.getForwardVector(), Vector.up)) / 180 * Math.PI
                 let phyTotal = Vector2.angle(
                     new Vector2(relativePos.x, relativePos.z),
-                    new Vector2(this.m_camera.forwardVector.x, this.m_camera.forwardVector.z)
+                    new Vector2(this.m_camera.transform.getForwardVector().x, this.m_camera.transform.getForwardVector().z)
                 ) *
                 Math.PI / 180 *
                 (this.assistAimController.customData.get("isRight") ? -1 : 1)
@@ -336,7 +336,7 @@ export class WeaponCameraCls{
     }
     InputRecoil(_recoil : WeaponRecoilCls){
         this.m_backTime = this.GetBackTime()
-        let vert = _recoil.getVertical() * Math.PI / 180
+        let vert = _recoil.GetVertical() * Math.PI / 180
         this.m_backTotal = _recoil._configData.backTotal * vert
         this.vibrationAmpl = _recoil.GetSelfSpinRange() * Math.PI / 180
         this.m_jumpTotal = new Vector2(_recoil.GetHorizontal() * Math.PI / 180, vert)

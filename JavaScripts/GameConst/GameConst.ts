@@ -190,7 +190,7 @@ declare namespace GameConst{
         jumpFovRate : number
         bulletSpeedRate : number
         magazineLoadTimeRate : number
-        maxAmmoRate : number
+        maxAmmoRate : Map<number, number>
         aimTimeRate : number
         pickSound : string
     }
@@ -225,5 +225,18 @@ declare namespace GameConst{
         diffuseFunction : DiffuseFunctionEnum
         jumpErrorScale : number
         crouchErrorScale : number
+    }
+    /**枪械动画配置 */
+    type WeaponAnimationConfigData = {
+        gunid : number
+        gunEvnet : number
+        isLoop : boolean
+        TransitionDuration : number
+        AnimationName : string
+        Detail : string
+        Speed : number
+        Weight : number
+        Coverplay : number
+        GunName : string
     }
 }

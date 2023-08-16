@@ -15,7 +15,7 @@ export abstract class WeaponBaseCls {
     /**
      * 枪械配置ID
      */
-    private id: number
+    id: number
     /**枪械绑定的锚点 */
     public root: GameObject
     /**枪械所属的玩家角色 */
@@ -87,8 +87,8 @@ export abstract class WeaponBaseCls {
     /**析构函数，需要手动调用 */
     public destructor() : void {
         this.EarlyDestructor()
-        this._weaponGUI:SetVisible(false)
-        this._magazine:RecordingBulletsLeft(true)
+        this._weaponGUI.SetVisible(false)
+        this._magazine.RecordingBulletsLeft(true)
         this.prefab.setVisibility(Type.PropertyStatus.On)
         this._weaponAccessoryList.forEach((value, key) => {
             if (value) {
@@ -98,8 +98,6 @@ export abstract class WeaponBaseCls {
         this._weaponAccessoryList.clear()
         //析构枪上的自有类
         this._cameraControl.destructor()
-        this._recoil.destructor()
-        this._magazine.destructor()
         this._weaponGUI.destructor()
         this._animationController.destructor()
         this._weaponSound.destructor()
@@ -288,8 +286,8 @@ export abstract class WeaponBaseCls {
                 this._isGoingToFire = false
             }
             if(hasFired){
-                this._recoil:Fire()
-                this._cameraControl:InputRecoil(this._recoil)
+                this._recoil.Fire()
+                this._cameraControl.InputRecoil(this._recoil)
             }
             //当前不允许开枪，则将枪中子弹连发剩余子弹清零
             if(!this._isAllowed){
@@ -315,21 +313,16 @@ export abstract class WeaponBaseCls {
             this._reloadWait = Math.max(0, this._reloadWait)
             this._pumpWait = Math.max(0, this._pumpWait)
             //其他控制类的更新
-            this._cameraControl:Update(_dt)
-            this._animationController:Update(_dt)
-            this._recoil:Update(_dt)
-            this._weaponGUI:Update(_dt)
-            this._magazine:Update()
+            this._cameraControl.Update(_dt)
+            this._animationController.Update(_dt)
+            this._recoil.Update(_dt)
+            this._weaponGUI.Update(_dt)
+            this._magazine.Update()
 
             this.RefreshScales()
         }
     }
 
-    private FixUpdate(_dt:number){
-        this._cameraControl:FixUpdate(_dt)
-        this._animationController:FixUpdate(_dt)
-        this._weaponGUI:FixUpdate(_dt)
-    }
     /**
      * 枪上装备一个配件
      * @param acce 配件实例
@@ -449,8 +442,8 @@ export abstract class WeaponBaseCls {
             return
         }
         this._isZoomIn = true
-        this._cameraControl:MechanicalAimStart()
-        this._weaponGUI:MechanicalAimStart()
+        this._cameraControl.MechanicalAimStart()
+        this._weaponGUI.MechanicalAimStart()
         Events.dispatchLocal(GameConst.LocalWeaponEvent.AimIn, this)
     }
     public MechanicalAimStop():void{
@@ -458,8 +451,8 @@ export abstract class WeaponBaseCls {
             return
         }
         this._isZoomIn = false
-        this._cameraControl:MechanicalAimStop()
-        this._weaponGUI:MechanicalAimStop()
+        this._cameraControl.MechanicalAimStop()
+        this._weaponGUI.MechanicalAimStop()
         Events.dispatchLocal(GameConst.LocalWeaponEvent.AimOut, this)
     }
     public WithdrawWeapon():void{
@@ -491,7 +484,7 @@ export abstract class WeaponBaseCls {
         this._isdraw = true
         this._aimBeforePump = false
         this._weaponGUI.SetVisible(true)
-        this._cameraControl.OnEquipWeapon(this)
+        this._cameraControl.OnEquipWeapon(this, null)
         this.prefab.setVisibility(Type.PropertyStatus.On)
         
         if(this._isWaitingPump){
@@ -576,7 +569,7 @@ export abstract class WeaponBaseCls {
         if (this._isZoomIn && this._configData.accurateAim) {
             return dir
         }
-        return WeaponTool.RandomRotate(dir, this._recoil.currentError)     
+        return WeaponTool.RandomRotate(dir, this._recoil._currentError)     
     }
     protected Fire(delay:number, consume:boolean){
         let isFriend = false

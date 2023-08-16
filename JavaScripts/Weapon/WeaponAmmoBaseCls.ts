@@ -9,6 +9,7 @@ export class WeaponAmmoBaseCls{
         this.id = id
         this.count = count
         this.character = character
+
         this.PickSound()
     }
 

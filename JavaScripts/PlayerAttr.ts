@@ -9,9 +9,9 @@ export default class PlayerAttr extends Core.Script {
     public maxHp : number
     /** 当脚本被实例后，会在第一帧更新前调用此函数 */
     protected onStart(): void {
-        this.maxHp = 100
-        this.hp = this.maxHp
-        let s = this.character.characterName
+        
+        console.log('创建成功脚本')
+
     }
     public InitData(c : Gameplay.Character){
         if(this.isRunningClient()){
@@ -20,6 +20,7 @@ export default class PlayerAttr extends Core.Script {
         this.character = c
         this.maxHp = 100
         this.hp = this.maxHp
+        console.log('玩家属性脚本初始化完成')
     }
     /**
      * 周期函数 每帧执行

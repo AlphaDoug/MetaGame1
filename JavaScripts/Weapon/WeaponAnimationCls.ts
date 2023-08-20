@@ -18,4 +18,8 @@ export class WeaponAnimationCls{
         //加速跑状态下收枪,其他状态正常持枪
         
     }
+
+    destructor(){
+        
+    }
 }

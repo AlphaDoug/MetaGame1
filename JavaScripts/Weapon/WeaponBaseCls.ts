@@ -74,7 +74,7 @@ export abstract class WeaponBaseCls {
         this.character = _character
         this._magazine = new WeaponMagazineCls(this)
         this._recoil = new WeaponRecoilCls()
-        this._cameraControl = new WeaponCameraCls()
+        this._cameraControl = new WeaponCameraCls(this._recoil)
         this._weaponGUI = new WeaponGUICls()
         this._animationController = new WeaponAnimationCls()
         this._weaponSound = new WeaponSoundCls()
@@ -87,7 +87,7 @@ export abstract class WeaponBaseCls {
     /**析构函数，需要手动调用 */
     public destructor() : void {
         this.EarlyDestructor()
-        this._weaponGUI.SetVisible(false)
+        //this._weaponGUI.SetVisible(false)
         this._magazine.RecordingBulletsLeft(true)
         this.prefab.setVisibility(Type.PropertyStatus.On)
         this._weaponAccessoryList.forEach((value, key) => {
@@ -98,9 +98,9 @@ export abstract class WeaponBaseCls {
         this._weaponAccessoryList.clear()
         //析构枪上的自有类
         this._cameraControl.destructor()
-        this._weaponGUI.destructor()
+        //this._weaponGUI.destructor()
         this._animationController.destructor()
-        this._weaponSound.destructor()
+        //this._weaponSound.destructor()
         //清除枪械所有者
         //self.gun.Player.Value = nil
 
@@ -316,7 +316,7 @@ export abstract class WeaponBaseCls {
             this._cameraControl.Update(_dt)
             this._animationController.Update(_dt)
             this._recoil.Update(_dt)
-            this._weaponGUI.Update(_dt)
+            //this._weaponGUI.Update(_dt)
             this._magazine.Update()
 
             this.RefreshScales()
@@ -443,7 +443,7 @@ export abstract class WeaponBaseCls {
         }
         this._isZoomIn = true
         this._cameraControl.MechanicalAimStart()
-        this._weaponGUI.MechanicalAimStart()
+        //this._weaponGUI.MechanicalAimStart()
         Events.dispatchLocal(GameConst.LocalWeaponEvent.AimIn, this)
     }
     public MechanicalAimStop():void{
@@ -452,7 +452,7 @@ export abstract class WeaponBaseCls {
         }
         this._isZoomIn = false
         this._cameraControl.MechanicalAimStop()
-        this._weaponGUI.MechanicalAimStop()
+        //this._weaponGUI.MechanicalAimStop()
         Events.dispatchLocal(GameConst.LocalWeaponEvent.AimOut, this)
     }
     public WithdrawWeapon():void{
@@ -464,7 +464,7 @@ export abstract class WeaponBaseCls {
             this.MechanicalAimStop()
         }
         this._cameraControl.OnUnEquipWeapon(true)
-        this._weaponGUI.SetVisible(false)
+        //this._weaponGUI.SetVisible(false)
         this.prefab.setVisibility(Type.PropertyStatus.Off)
         if(this._onReload){
             this._reloadWait = 0
@@ -483,7 +483,7 @@ export abstract class WeaponBaseCls {
         this._isWithDrawing = true
         this._isdraw = true
         this._aimBeforePump = false
-        this._weaponGUI.SetVisible(true)
+        //this._weaponGUI.SetVisible(true)
         this._cameraControl.OnEquipWeapon(this, null)
         this.prefab.setVisibility(Type.PropertyStatus.On)
         
@@ -541,18 +541,32 @@ export abstract class WeaponBaseCls {
             return result
         }
         //判定命中是靶子或者障碍物
-        info.forEach(element => {
-            if (false) {
-                //当前命中的是角色
-                break
+        for (const key in info) {
+            if (Object.prototype.hasOwnProperty.call(info, key)) {
+                const element = info[key];
+                if (element.gameObject instanceof Gameplay.Character && element.gameObject != Gameplay.getCurrentPlayer().character) {
+                    //当前命中的是角色
+                    return
+                }
+                if (element.gameObject.getCollision() == Type.CollisionStatus.On) {
+                    result.HitPoint = element.impactPoint
+                    result.HitObject = element.gameObject
+                    result.HitNormal = element.impactNormal
+                    return result
+                }
             }
-            if (element.gameObject) {
-                
-                return result
+        }
+        for (const key in info) {
+            if (Object.prototype.hasOwnProperty.call(info, key)) {
+                const element = info[key];
+                if(element.gameObject instanceof Gameplay.Character){
+                    //玩家是否可以被命中判断
+
+                    //玩家是否已经死亡的判断
+                    
+                }
             }
-
-
-        })
+        }
         //判定命中玩家的部位,判定成功后直接返回
         info.forEach(element => {
             
@@ -584,7 +598,7 @@ export abstract class WeaponBaseCls {
                 this.Consume()
             }
             if(hit.HitObject == null){
-                endPos = this.RayCastOrigin().add(direction.multiply(this._configData.distance * ))
+                endPos = this.RayCastOrigin().add(direction.multiply(this._configData.distance))
             }
             this.MakeBullet(endObj, endPos, endNorm)
             if(hit.IsTarget){

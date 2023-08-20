@@ -28,8 +28,8 @@ export abstract class WeaponBaseCls {
     private toss: GameObject
 
     /**枪械是否被持有 */
-    private _isdraw: boolean = false
-    private _isZoomIn : boolean = false
+    _isdraw: boolean = false
+    _isZoomIn : boolean = false
     private _rapidlyRemainingBullets: number = 1
     private _curShootMode : FireModeEnum = GameConst.FireModeEnum.Auto
     private _hasJustFired : boolean = false
@@ -58,7 +58,7 @@ export abstract class WeaponBaseCls {
     
     private _magazine: WeaponMagazineCls
      _recoil : WeaponRecoilCls
-    private _cameraControl : WeaponCameraCls
+    _cameraControl : WeaponCameraCls
      _weaponGUI:WeaponGUICls
     private _animationController : WeaponAnimationCls
     private _weaponSound : WeaponSoundCls

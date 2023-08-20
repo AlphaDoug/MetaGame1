@@ -61,7 +61,22 @@ export class CameraController{
         this.crouchController.UpdateFunction(this.crouchController, dt)
         this.ShakeController.UpdateFunction(this.crouchController, dt)
         if(this.deltaPhy != 0){
-            
+            //Gameplay.getCurrentPlayer().character.lookAt
         }
+        
+    }
+    Crouch(){
+        this.crouchController.StartFunction(this.crouchController)
+        if(this.gun && this.gun._isdraw){
+            this.gun._cameraControl.Crouch()
+        }
+    }
+    SetOffset(){
+        this.m_camera.cameraSystemRelativeTransform.location = this.offset.add(Vector.up.multiply(this.m_currentHeight)).add(this.deltaOffset)
+    }
+    CameraShake(strength:number, time:number){
+        this.shakeStrenth = strength
+        this.shakeTime = time
+        this.ShakeController.StartFunction(this.ShakeController)
     }
 }

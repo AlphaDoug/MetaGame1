@@ -1,5 +1,5 @@
 declare namespace GameConst{
-    enum LocalWeaponEvent {
+    export enum LocalWeaponEvent {
         PickWeapon = 'PickWeapon',
         DrawWeapon = 'DrawWeapon',
         WithDrawWeapon = 'WithDrawWeapon',

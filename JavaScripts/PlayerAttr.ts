@@ -10,7 +10,7 @@ export default class PlayerAttr extends Core.Script {
     /** 当脚本被实例后，会在第一帧更新前调用此函数 */
     protected onStart(): void {
         
-        console.log('创建成功脚本')
+        console.log('创建成功脚本' + this.guid)
 
     }
     public InitData(c : Gameplay.Character){

@@ -1,5 +1,5 @@
-declare namespace EventConst{
-    enum ClientEvent {
+export namespace EventConst{
+    export enum ClientEvent {
         PlayerBeHitEvent = "PlayerBeHitEvent",
         PlayerNearWeaponEvent = "PlayerNearWeaponEvent",
         PlayerFarWeaponEvent = 'PlayerFarWeaponEvent',
@@ -14,9 +14,10 @@ declare namespace EventConst{
         OnEquipWeaponEvent = 'OnEquipWeaponEvent',
         SettingReadyEvent = 'SettingReadyEvent',
         WeaponObjCreatedEvent = 'WeaponObjCreatedEvent',
-        WeaponObjActiveChangeEvent = 'WeaponObjActiveChangeEvent'
+        WeaponObjActiveChangeEvent = 'WeaponObjActiveChangeEvent',
+        PlayerAddSuccessedEvent = 'PlayerAddSuccessedEvent',
     }
-    enum ServerEvent {
+    export enum ServerEvent {
         WeaponHitPlayerEvent ='WeaponHitPlayerEvent',
         CreateAmmoEvent ='CreateAmmoEvent',
         DestroyAmmoEvent ='DestroyAmmoEvent',

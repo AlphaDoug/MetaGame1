@@ -1,3 +1,5 @@
+import ClientBase from "./Client/ClientBase"
+import PlayerAttr from "./PlayerAttr"
 import { WeaponAccessoryBaseCls } from "./Weapon/WeaponAccessoryBaseCls"
 import { WeaponAmmoBaseCls } from "./Weapon/WeaponAmmoBaseCls"
 import { WeaponBaseCls } from "./Weapon/WeaponBaseCls"
@@ -18,9 +20,10 @@ export class PlayerGunMgr {
     canUpdateGun = true
     // 单例模式
     private static _instance: PlayerGunMgr;
-    public static get Instance() {
+    public static async Instance() {
         if (PlayerGunMgr._instance == null) {
-            PlayerGunMgr._instance = new PlayerGunMgr(Gameplay.getCurrentPlayer().character)
+            let player = await Gameplay.asyncGetCurrentPlayer()
+            PlayerGunMgr._instance = new PlayerGunMgr(player.character)
         }
         return PlayerGunMgr._instance
     }
@@ -56,17 +59,22 @@ export class PlayerGunMgr {
         })
         InputUtil.onKeyDown(Keys.RightMouseButton, () => {
             //判断血量
-
-
+            let a = this.GetLocalAttr()
+            if(a.hp <= 0){
+                return
+            }
             if(this.curGun){
                 this.curGun.MechanicalAimStart()
             }
         })
         
         InputUtil.onKeyDown(Keys.R, () => {
+            let a = this.GetLocalAttr()
+            if(a.hp <= 0){
+                return
+            }
+            this.curGun = this.mainGun
             //判断血量
-            
-
             if(this.curGun){
                 this.curGun.LoadMagazine()
             }
@@ -89,12 +97,27 @@ export class PlayerGunMgr {
     }
 
     SwitchWeapon(index:number){
-
+        let a = this.GetLocalAttr()
+        if(a.hp <= 0){
+            return
+        }
     }
     ChangeShootMode(){
-        
+        let a = this.GetLocalAttr()
+        if(a.hp <= 0){
+            return
+        }
     }
     DropWeapon(){
-
+        let a = this.GetLocalAttr()
+        if(a.hp <= 0){
+            return
+        }
+    }
+    GetLocalAttr():PlayerAttr{
+        return ClientBase.mInstance.GetPlayerAttr(getCurrentPlayer().character.guid)
+    }
+    GetOtherAttr(guid:string):PlayerAttr{
+        return ClientBase.mInstance.GetPlayerAttr(guid)
     }
 }

@@ -1,4 +1,5 @@
-﻿import { WeaponAccessoryBaseCls } from "./WeaponAccessoryBaseCls"
+﻿import ClientBase from "../Client/ClientBase"
+import { WeaponAccessoryBaseCls } from "./WeaponAccessoryBaseCls"
 import { WeaponAnimationCls } from "./WeaponAnimationCls"
 import { WeaponCameraCls } from "./WeaponCameraCls"
 import { WeaponGUICls } from "./WeaponGUICls"
@@ -64,7 +65,7 @@ export abstract class WeaponBaseCls {
     private _weaponSound : WeaponSoundCls
     public error: number
 
-    public get _configData() : GameConst.WeaponConfigData
+    public _configData : GameConst.WeaponConfigData
 
     private _autoFireAim:boolean
     constructor(_character:Character, _root : GameObject, _weaponObj: GameObject){
@@ -552,10 +553,13 @@ export abstract class WeaponBaseCls {
                     result.HitPoint = element.impactPoint
                     result.HitObject = element.gameObject
                     result.HitNormal = element.impactNormal
+                    result.HitPart = GameConst.HitPartEnum.None
+                    result.IsTarget = false
                     return result
                 }
             }
         }
+        //判定命中玩家的部位,判定成功后直接返回
         for (const key in info) {
             if (Object.prototype.hasOwnProperty.call(info, key)) {
                 const element = info[key];
@@ -563,15 +567,22 @@ export abstract class WeaponBaseCls {
                     //玩家是否可以被命中判断
 
                     //玩家是否已经死亡的判断
-                    
+                    if(ClientBase.mInstance.GetPlayerAttr(element.gameObject.guid).hp <= 0){
+                        continue
+                    }
+                    //是否可以命中自己
+                    if(!this._configData.isHitSelf && element.gameObject == Gameplay.getCurrentPlayer().character){
+                        continue
+                    }
+                    result.HitPoint = element.impactPoint
+                    result.HitObject = element.gameObject
+                    result.HitNormal = element.impactNormal
+                    result.HitPart = GameConst.HitPartEnum.Body
+                    result.IsTarget = false
+                    return result
                 }
             }
         }
-        //判定命中玩家的部位,判定成功后直接返回
-        info.forEach(element => {
-            
-        })
-
         return result
     }
     private CalculateRayCastDirection():Vector{
@@ -597,10 +608,14 @@ export abstract class WeaponBaseCls {
             if(consume){
                 this.Consume()
             }
-            if(hit.HitObject == null){
+            if(!hit.HitObject){
                 endPos = this.RayCastOrigin().add(direction.multiply(this._configData.distance))
             }
             this.MakeBullet(endObj, endPos, endNorm)
+            if(hit.HitPart && hit.HitPart != GameConst.HitPartEnum.None){
+                this.Damage(hit)
+            }
+            this.MakeHitEffect(endPos)
             if(hit.IsTarget){
                 hit.Damage = this._configData.damage
                 Events.dispatchLocal(GameConst.LocalWeaponEvent.SuccessfullyHitTarget, this, hit)

@@ -6,7 +6,11 @@ import PlayerAttr from "./../PlayerAttr"
 @Core.Class
 export default class ServerBase extends Core.Script {
     private totalPlayerAttrs: Map<string, PlayerAttr> = new Map
-
+    static mInstance: ServerBase
+    constructor(data){
+        super(data)
+        ServerBase.mInstance = this
+    }
     protected onStart(): void {
         Events.addPlayerJoinedListener(this.OnPlayerJoined.bind(this))
         Events.addPlayerLeftListener(this.OnPlayerLeft.bind(this))

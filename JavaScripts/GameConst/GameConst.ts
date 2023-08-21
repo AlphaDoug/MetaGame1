@@ -19,7 +19,7 @@ declare namespace GameConst{
         AimIn = 'AimIn',
         AimOut = 'AimOut',
     }
-    enum GunModeEnum {
+    export enum GunModeEnum {
         SniperRifle = 1, 
         AssaultRifle = 2, 
         SubMachineGun = 3,
@@ -31,50 +31,50 @@ declare namespace GameConst{
         Other = 9, 
         TrailingGun = 10
     }
-    enum HitPartEnum{
-        None = 0,
+    export enum HitPartEnum{
+        None = 10,
         Head = 1,
         Body = 2,
         Limb = 3,
         Fort = 4
     }
-    enum FireModeEnum{
+    export enum FireModeEnum{
         Auto = 1, 
         Rapidly_1 = 2, 
         Rapidly_2 = 3, 
         Single = 4 
     }
-    enum DiffuseFunctionEnum{
+    export enum DiffuseFunctionEnum{
         Linear = 1,
         Sqrt = 2,
         Square = 3
     }
-    enum CanBeEquipPositionEnum{
+    export enum CanBeEquipPositionEnum{
         MainOrDeputy = 1,
         Mini = 2,
         Prop = 3
     }
     /**枪械配件类型 */
-    enum WeaponAccessoryTypeEnum{
+    export enum WeaponAccessoryTypeEnum{
         Muzzle = 1,
         Grip = 2,
         Magazine = 3,
         Butt = 4,
         Sight = 5
     }
-    enum UnitTypeEnum{
+    export enum UnitTypeEnum{
         Weapon = 1,
         Accessory = 2,
         Ammo = 3
     }
-    enum ObjectTypeEnum{
+    export enum ObjectTypeEnum{
         Hole = 1,
         FireEff = 2,
         HitEff = 3,
         Shell = 4,
         Sound = 5
     }
-    enum PlayerActionModeEnum{
+    export enum PlayerActionModeEnum{
         Run = 1, 
         QuicklyRun = 2, 
         AimRun = 3, 
@@ -84,24 +84,24 @@ declare namespace GameConst{
     }
 }
 declare namespace GameConst{
-    type DamageAttenuation = {
+    export type DamageAttenuation = {
         Distance: number;
         Attenuation: number;
     }
 
-    type BoneWeight = {
+    export type BoneWeight = {
 
     }
-    type WeaponHitResult = {
+    export type WeaponHitResult = {
         HitPoint : Vector
         HitObject : GameObject
         HitNormal : Vector
-        HitPart : HitPartEnum
+        HitPart :GameConst.HitPartEnum
         IsTarget : boolean
         Damage : number
     }
     /**枪械配置静态属性 */
-    type WeaponConfigData = {
+    export type WeaponConfigData = {
         name : string
         des : string
         icon : string
@@ -160,7 +160,7 @@ declare namespace GameConst{
         weight : number
     }
     /**枪械弹夹配置静态属性 */
-    type WeaponMagazineConfigData = {
+    export type WeaponMagazineConfigData = {
         matchAmmo : number
         name : string
         maxNum : number
@@ -172,7 +172,7 @@ declare namespace GameConst{
         ammoModel : string
     }
     /**枪械配件配置静态属性 */
-    type WeaponAccessoryConfigData = {
+    export type WeaponAccessoryConfigData = {
         name : string
         des : string
         icon : string
@@ -195,14 +195,14 @@ declare namespace GameConst{
         pickSound : string
     }
     /**枪械相机相关的配置 */
-    type WeaponCameraConfigData = {
+    export type WeaponCameraConfigData = {
         vibrationDump : number
         vibrationOmega : number
         jumpTime : number
         jumpFOV : number
     }
     /**后坐力配置 */
-    type WeaponRecoilConfigData = {
+    export type WeaponRecoilConfigData = {
         minError : number
         maxError : number
         gunRecoil : number
@@ -227,7 +227,7 @@ declare namespace GameConst{
         crouchErrorScale : number
     }
     /**枪械动画配置 */
-    type WeaponAnimationConfigData = {
+    export type WeaponAnimationConfigData = {
         gunid : number
         gunEvnet : number
         isLoop : boolean

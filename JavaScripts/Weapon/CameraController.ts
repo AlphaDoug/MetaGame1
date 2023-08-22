@@ -10,10 +10,10 @@ export class CameraController{
     m_supposedHeight : number
     deltaOffset : Vector
     fieldOfView : number
-    deltaTheta : number
-    gamma : number
+    deltaTheta : number = 0
+    gamma : number = 0
     distance : number
-    deltaPhy : number
+    deltaPhy : number = 0
     shakeTime : number
     shakeStrenth : number
 
@@ -61,9 +61,30 @@ export class CameraController{
         this.crouchController.UpdateFunction(this.crouchController, dt)
         this.ShakeController.UpdateFunction(this.crouchController, dt)
         if(this.deltaPhy != 0){
-            //Gameplay.getCurrentPlayer().character.lookAt
+            this.m_camera.transform.rotate(Vector.up, this.deltaPhy)
         }
-        
+        if(this.deltaTheta != 0){
+            this.m_camera.transform.rotate(Vector.right, this.deltaTheta)
+        }
+        if(this.distance){
+            this.m_camera.targetArmLength = this.distance
+        }
+        if(this.gamma != 0){
+            this.m_camera.transform.rotate(Vector.forward, this.gamma)
+        }
+        if(this.fieldOfView != this.m_camera.cameraFOV){
+            this.m_camera.cameraFOV = this.fieldOfView          
+        }
+        this.SetOffset()
+        this.ClearData()
+
+    }
+    ClearData(){
+        this.deltaPhy = 0
+        this.deltaTheta = 0
+        this.gamma = 0
+        this.distance = null
+        this.fieldOfView = this.m_camera.cameraFOV
     }
     Crouch(){
         this.crouchController.StartFunction(this.crouchController)

@@ -20,11 +20,16 @@ export class WeaponCameraCls{
     screenSize : Vector2
     m_sensitivity : number
     m_originDistance : number
+    /**相机臂长度 */
     distance : number
     m_aimDistance : number
+    /**自旋角 */
     m_gamma : number
+    /**水平偏移 */
     deltaPhy : number
+    /**竖直偏移 */
     deltaTheta : number
+    /**fov变化值 */
     m_deltaFOV : number
     m_lastMousePos : Vector2
     vibrationAmpl : number
@@ -32,7 +37,7 @@ export class WeaponCameraCls{
     m_jumpTotal : Vector2
     m_backTotal : number
     enableAssistAim : boolean
-    aimEnemy : Character
+    aimEnemy : Gameplay.Character
     AimingIsOver : boolean
     m_jumpFovRateScale : number
     m_aimTimeRateScale : number
@@ -155,7 +160,7 @@ export class WeaponCameraCls{
                 if (this.aimEnemy) {
                     this.assistAimController.StartFunction(this.assistAimController)
                 }
-                this.gun._weaponGUI.Fire()
+                //this.gun._weaponGUI.Fire()
             },
             () => {
                 if(this.recoverController.isPlaying){
@@ -370,19 +375,19 @@ export class WeaponCameraCls{
         this.EndAll()
         this.isUpdating = false
     }
-    GetEnemies():Array<Character>{
-        let res = new Array<Character>()
+    GetEnemies():Array<Gameplay.Character>{
+        let res = new Array<Gameplay.Character>()
         Gameplay.getAllPlayers().forEach((v)=>{
             
         })
         return res
     }
-    IsVisible(_enemy:Character):boolean{
+    IsVisible(_enemy:Gameplay.Character):boolean{
         let pos = this.GetCameraPos()
         let res = true
         let rayCastHead = Gameplay.lineTrace(pos, _enemy.getWorldLocation().add(Vector.up.multiply(_enemy.capsuleHalfHeight)))
         rayCastHead.forEach((v)=>{
-            if(!(v.gameObject instanceof Character) || (v.gameObject != _enemy && (v.gameObject) != Gameplay.getCurrentPlayer().character)){
+            if(!(v.gameObject instanceof Gameplay.Character) || (v.gameObject != _enemy && (v.gameObject) != Gameplay.getCurrentPlayer().character)){
                 res = false
                 return
             }
@@ -458,11 +463,11 @@ export class WeaponCameraCls{
         return this.configData.jumpFOV * this.m_jumpFovRateScale * 
         Gameplay.getCurrentPlayer().character.cameraSystem.cameraFOV / this.m_originZoom
     }
-    GetAimPos(enemy:Character): Vector {
+    GetAimPos(enemy:Gameplay.Character): Vector {
         let pos1:Vector
         let pos2 :Vector
-        pos1 = enemy.getAppearance<HumanoidV2>().getSlotWorldPosition(SlotType.Head)
-        pos2 = enemy.getAppearance<HumanoidV2>().getSlotWorldPosition(SlotType.Buttocks)
+        pos1 = enemy.getAppearance<Gameplay.HumanoidV2>().getSlotWorldPosition(SlotType.Head)
+        pos2 = enemy.getAppearance<Gameplay.HumanoidV2>().getSlotWorldPosition(SlotType.Buttocks)
         return pos1.multiply(2).add(pos2).divide(3)
     }
     GetTarget():[Vector, boolean]{
@@ -475,7 +480,7 @@ export class WeaponCameraCls{
         this.aimEnemy = null
         if(this.enableAssistAim){
             let minDis = this.GetAssistAimDis()
-            let candidate:Character
+            let candidate:Gameplay.Character
             this.GetEnemies().forEach((v)=>{
                 //找到最近的人
                 let targetPos = this.GetAimPos(v)

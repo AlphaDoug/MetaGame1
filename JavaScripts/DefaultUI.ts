@@ -87,6 +87,8 @@ export default class UIDefault extends UI.UIBehavior {
 		//点击攻击按钮,异步获取人物后执行攻击动作
         AttackBtn.onPressed.add(()=>{
 				Gameplay.asyncGetCurrentPlayer().then((player) => {
+					player.character.cameraSystem.switchCameraMode(Gameplay.CameraMode.Default)
+					player.character.cameraSystem.cameraRelativeTransform.rotation = Rotation.zero
 					this.Character = player.character;
 					//让动画只在上半身播放
 					let anim1 = player.character.loadAnimation("61245");
